@@ -1,0 +1,27 @@
+# Bağımlılıklar
+node_modules/
+
+# Ortam değişkenleri (DB şifresi, JWT secret burada!)
+.env
+.env.local
+.env.production
+
+# Log dosyaları
+logs/
+*.log
+npm-debug.log*
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editör
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Build çıktıları (varsa)
+dist/
+build/

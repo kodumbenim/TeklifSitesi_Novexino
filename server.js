@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/kategoriler', require('./routes/kategoriler'));
 app.use('/api/urunler', require('./routes/urunler'));
 app.use('/api/teklifler', require('./routes/teklifler'));
 

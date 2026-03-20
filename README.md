@@ -12,7 +12,9 @@ Profesyonel teklif yönetim sistemi. Node.js + Express + PostgreSQL ile gelişti
 - **İskonto Sistemi:** Yüzde bazlı iskonto — ara toplam, iskonto tutarı ve net toplam otomatik hesaplanır
 - **Müşteri Bilgileri:** Ad/soyad, firma, e-posta, telefon, geçerlilik tarihi
 - **Durum Takibi:** Taslak → Gönderildi → Onaylandı / Reddedildi
-- **Demo Ürünler:** 8 hazır ürün (Alüminyum, PVC, Cam, Çelik, Kompozit, Demir Doğrama)
+- **Kategori Sistemi _(yeni)_:** Ayrı `kategoriler` tablosu — `urunler` tablosuyla `kategori_id` foreign key ile bağlı
+- **20 Sektör Kategorisi _(yeni)_:** Alüminyum, PVC, Cam, Çelik Konstrüksiyon, Paslanmaz Çelik, Galvanizli Çelik, Ahşap, Polikarbonat, EPDM & Silikon, Isı Yalıtım, Ses Yalıtım, Boya & Kaplama, Aksesuar & Bağlantı, Kapı Sistemleri, Güneş Kontrolü, Elektrik, Mekanik Tesisat, Demir Doğrama, Kompozit, Diğer
+- **Dinamik Dropdown _(yeni)_:** Ürün ekleme modalındaki kategori listesi API'den otomatik yüklenir
 
 ---
 
@@ -58,9 +60,10 @@ node database/setup.js
 
 Bu komut:
 - `teklif_db` veritabanını oluşturur
-- Tüm tabloları (users, urunler, teklifler, teklif_kalemleri) oluşturur
+- Tüm tabloları (users, kategoriler, urunler, teklifler, teklif_kalemleri) oluşturur
 - `admin@teklif.com / Admin123` demo hesabını ekler
-- 8 demo ürün yükler
+- **20 sektör kategorisi** yükler
+- **20 demo ürün** yükler (FK ile kategorilere bağlı)
 
 ### 4. Sunucuyu başlat
 ```bash
@@ -87,6 +90,7 @@ Teklif_Sitesi/
 │   └── auth.js                # JWT doğrulama middleware
 ├── routes/
 │   ├── auth.js                # POST /api/auth/login|register
+│   ├── kategoriler.js         # GET|POST|DELETE /api/kategoriler  ← YENİ
 │   ├── urunler.js             # GET|POST|PUT|DELETE /api/urunler
 │   └── teklifler.js           # GET|POST|PUT|DELETE /api/teklifler
 │                              # POST /api/teklifler/:id/kalemler
@@ -115,10 +119,17 @@ Teklif_Sitesi/
 | POST | `/api/auth/login` | Giriş yap, JWT token al |
 | POST | `/api/auth/register` | Yeni kullanıcı kaydet |
 
+### Kategoriler _(yeni)_
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| GET | `/api/kategoriler` | Tüm kategorileri listele |
+| POST | `/api/kategoriler` | Yeni kategori ekle |
+| DELETE | `/api/kategoriler/:id` | Kategori sil (soft delete) |
+
 ### Ürünler
 | Method | Endpoint | Açıklama |
 |--------|----------|----------|
-| GET | `/api/urunler` | Tüm ürünleri listele |
+| GET | `/api/urunler` | Tüm ürünleri listele (kategori JOIN ile) |
 | POST | `/api/urunler` | Yeni ürün ekle |
 | PUT | `/api/urunler/:id` | Ürün güncelle |
 | DELETE | `/api/urunler/:id` | Ürün sil (soft delete) |
@@ -163,3 +174,24 @@ node server.js
 ## 📜 Lisans
 
 MIT © 2026
+
+---
+
+## 📋 Değişiklik Geçmişi
+
+### v1.1.0 — 2026-03-21
+- ✅ `kategoriler` tablosu eklendi
+- ✅ `urunler` tablosu `kategori_id` foreign key ile `kategoriler`'e bağlandı
+- ✅ `teklif_kalemleri` tablosuna `kategori_id` eklendi
+- ✅ 20 sektör kategorisi tanımlandı (8'den 20'ye çıkarıldı)
+- ✅ 20 demo ürün eklendi (FK ile kategorilere bağlı)
+- ✅ `/api/kategoriler` endpoint'i eklendi
+- ✅ Ürün ekleme modalında kategori dropdown'ı API'den dinamik yükleniyor
+
+### v1.0.0 — 2026-03-17
+- 🎉 İlk sürüm yayınlandı
+- JWT tabanlı login sistemi
+- Teklif oluşturma, düzenleme, silme
+- Ürün kalemleri (ebat, miktar, fiyat)
+- İskonto sistemi
+- 8 demo ürün

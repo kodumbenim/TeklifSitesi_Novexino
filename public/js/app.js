@@ -2,6 +2,7 @@ const API = 'http://localhost:3000/api';
 let aktifTeklifId = null;
 let tumUrunler = [];
 let tumTeklifler = [];
+let tumKategoriler = [];
 
 // ---- AUTH ----
 function tokenAl() { return localStorage.getItem('token'); }
@@ -34,7 +35,7 @@ async function init() {
   document.getElementById('userRole').textContent = kullanici.rol || 'kullanici';
   document.getElementById('userAvatar').textContent = (kullanici.ad || 'K')[0].toUpperCase();
 
-  await Promise.all([teklifleriYukle(), urunleriYukle()]);
+  await Promise.all([teklifleriYukle(), urunleriYukle(), kategorileriYukle()]);
 }
 
 // ---- TEKLİFLER ----
@@ -177,10 +178,27 @@ async function urunleriYukle() {
   tumUrunler = await res.json();
 }
 
+async function kategorileriYukle() {
+  const res = await apiFetch('/kategoriler');
+  if (!res) return;
+  tumKategoriler = await res.json();
+}
+
 function urunEkleModal() {
   if (!aktifTeklifId) return;
   document.getElementById('formUrunEkle').reset();
   document.getElementById('previewTutar').textContent = '₺0,00';
+
+  // Kategori dropdown'ını API'den gelen verilerle dinamik doldur
+  const sektorSelect = document.getElementById('ue_sektor');
+  sektorSelect.innerHTML = '<option value="">Kategori seçin</option>';
+  tumKategoriler.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k.id;
+    opt.textContent = k.ad;
+    sektorSelect.appendChild(opt);
+  });
+
   renderUrunChips(tumUrunler);
   modalAc('modalUrunEkle');
 }
@@ -200,7 +218,7 @@ function renderUrunChips(urunler) {
 
 function urunSec(urun) {
   document.getElementById('ue_ad').value = urun.ad;
-  document.getElementById('ue_sektor').value = urun.sektor;
+  document.getElementById('ue_sektor').value = urun.kategori_id || '';
   document.getElementById('ue_birim').value = urun.birim;
   document.getElementById('ue_fiyat').value = urun.birim_fiyat;
   document.getElementById('ue_aciklama').value = urun.aciklama || '';
@@ -223,9 +241,12 @@ function hesaplaPreview() {
 
 document.getElementById('formUrunEkle').addEventListener('submit', async function (e) {
   e.preventDefault();
+  const kategoriId = parseInt(document.getElementById('ue_sektor').value);
+  const kategori = tumKategoriler.find(k => k.id === kategoriId);
   const body = {
     urun_ad: document.getElementById('ue_ad').value.trim(),
-    sektor: document.getElementById('ue_sektor').value,
+    kategori_id: kategoriId || null,
+    sektor: kategori?.ad || '',
     birim: document.getElementById('ue_birim').value,
     en: parseFloat(document.getElementById('ue_en').value) || null,
     boy: parseFloat(document.getElementById('ue_boy').value) || null,
